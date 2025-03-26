@@ -4,14 +4,16 @@ model = dict(
     type='RecognizerGCN',
     backbone=dict(
         type='STGCN', graph_cfg=dict(layout='coco', mode='stgcn_spatial')),
-    cls_head=dict(type='GCNHead', num_classes=60, in_channels=256))
+    cls_head=dict(type='GCNHead', num_classes=5, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = 'data/skeleton/ntu60_2d.pkl'
+# ann_file = 'data/skeleton/ntu60_2d.pkl'
+ann_file = './train.pkl'
+load_from = 'https://download.openmmlab.com/mmaction/v1.0/skeleton/stgcn/stgcn_8xb16-joint-u100-80e_ntu60-xsub-keypoint-2d/stgcn_8xb16-joint-u100-80e_ntu60-xsub-keypoint-2d_20221129-484a394a.pth'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSampleFrames', clip_len=100),
+    dict(type='UniformSampleFrames', clip_len=150),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
     dict(type='PackActionInputs')
@@ -20,7 +22,7 @@ val_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
     dict(
-        type='UniformSampleFrames', clip_len=100, num_clips=1, test_mode=True),
+        type='UniformSampleFrames', clip_len=150, num_clips=1, test_mode=True),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
     dict(type='PackActionInputs')
@@ -29,7 +31,7 @@ test_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
     dict(
-        type='UniformSampleFrames', clip_len=100, num_clips=10,
+        type='UniformSampleFrames', clip_len=150, num_clips=10,
         test_mode=True),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
@@ -48,7 +50,7 @@ train_dataloader = dict(
             type=dataset_type,
             ann_file=ann_file,
             pipeline=train_pipeline,
-            split='xsub_train')))
+            split='train')))
 val_dataloader = dict(
     batch_size=16,
     num_workers=2,
@@ -58,7 +60,7 @@ val_dataloader = dict(
         type=dataset_type,
         ann_file=ann_file,
         pipeline=val_pipeline,
-        split='xsub_val',
+        split='val',
         test_mode=True))
 test_dataloader = dict(
     batch_size=1,
@@ -69,14 +71,14 @@ test_dataloader = dict(
         type=dataset_type,
         ann_file=ann_file,
         pipeline=test_pipeline,
-        split='xsub_val',
+        split='val',
         test_mode=True))
 
 val_evaluator = [dict(type='AccMetric')]
 test_evaluator = val_evaluator
 
 train_cfg = dict(
-    type='EpochBasedTrainLoop', max_epochs=16, val_begin=1, val_interval=1)
+    type='EpochBasedTrainLoop', max_epochs=100, val_begin=1, val_interval=1)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 
@@ -91,7 +93,16 @@ param_scheduler = [
 
 optim_wrapper = dict(
     optimizer=dict(
-        type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0005, nesterov=True))
+        type='Adam', 
+        lr=0.001,
+        betas=(0.9, 0.999),
+        eps=1e-08,
+        weight_decay=0.0001,
+        amsgrad=False))
+
+# optim_wrapper = dict(
+#     optimizer=dict(
+#         type='SGD', lr=0.005, momentum=0.9, weight_decay=0.005, nesterov=True))
 
 default_hooks = dict(checkpoint=dict(interval=1), logger=dict(interval=100))
 

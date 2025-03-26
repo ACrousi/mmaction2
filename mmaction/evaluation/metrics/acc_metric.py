@@ -228,7 +228,6 @@ class ConfusionMatrix(BaseMetric):
         >>> plt.show()
 
         2. In the config file
-
         .. code:: python
 
             val_evaluator = dict(type='ConfusionMatrix')
@@ -337,7 +336,7 @@ class ConfusionMatrix(BaseMetric):
         """  # noqa: E501
         import matplotlib.pyplot as plt
 
-        fig, ax = plt.subplots(figsize=(10, 10))
+        fig, ax = plt.subplots(figsize=(6, 6))
 
         num_classes = confusion_matrix.size(0)
 

@@ -92,6 +92,13 @@ class PackActionInputs(BaseTransform):
         if 'label' in results:
             data_sample.set_gt_label(results['label'])
 
+        # Add frame_dir to data_sample
+        if 'frame_dir' in results:
+            data_sample.set_field(results['frame_dir'], 'gt_frame_dir', dtype=str)
+        
+        if 'source_id' in results:
+            data_sample.set_field(results['source_id'], 'gt_source_id', dtype=str)
+
         # Set custom algorithm keys
         for key in self.algorithm_keys:
             if key in results:

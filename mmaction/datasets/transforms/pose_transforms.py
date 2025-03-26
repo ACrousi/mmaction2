@@ -773,7 +773,7 @@ class JointToBone(BaseTransform):
                  target: str = 'keypoint') -> None:
         self.dataset = dataset
         self.target = target
-        if self.dataset not in ['nturgb+d', 'openpose', 'coco']:
+        if self.dataset not in ['nturgb+d', 'openpose', 'coco', 'coco_6']:
             raise ValueError(
                 f'The dataset type {self.dataset} is not supported')
         if self.dataset == 'nturgb+d':
@@ -791,6 +791,8 @@ class JointToBone(BaseTransform):
             self.pairs = ((0, 0), (1, 0), (2, 0), (3, 1), (4, 2), (5, 0),
                           (6, 0), (7, 5), (8, 6), (9, 7), (10, 8), (11, 0),
                           (12, 0), (13, 11), (14, 12), (15, 13), (16, 14))
+        elif self.dataset == 'coco_6':
+            self.pairs = ((4, 2), (2, 0), (5, 3), (3, 1))
 
     def transform(self, results: Dict) -> Dict:
         """The transform function of :class:`JointToBone`.

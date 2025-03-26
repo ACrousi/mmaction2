@@ -9,9 +9,27 @@ from mmengine.config import Config, DictAction
 from mmengine.evaluator import Evaluator
 from mmengine.runner import Runner
 
+import numpy as np
 from mmaction.evaluation import ConfusionMatrix
 from mmaction.registry import DATASETS
 from mmaction.utils import register_all_modules
+
+
+def calculate_metrics(confusion_matrix):
+    """Calculate precision, recall, and F1-score from the confusion matrix."""
+    num_classes = confusion_matrix.shape[0]
+    precision = np.zeros(num_classes)
+    recall = np.zeros(num_classes)
+    f1_score = np.zeros(num_classes)
+    for i in range(num_classes):
+        tp = confusion_matrix[i, i]
+        fp = np.sum(confusion_matrix[:, i]) - tp
+        fn = np.sum(confusion_matrix[i, :]) - tp
+        precision[i] = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall[i] = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1_score[i] = 2 * precision[i] * recall[i] / (
+            precision[i] + recall[i]) if (precision[i] + recall[i]) > 0 else 0
+    return precision, recall, f1_score
 
 
 def parse_args():
@@ -125,6 +143,11 @@ def main():
         if args.show_path is not None:
             fig.savefig(args.show_path)
             print(f'The confusion matrix is saved at {args.show_path}.')
+
+    precision, recall, f1_score = calculate_metrics(cm.numpy())
+    print('Precision:', precision)
+    print('Recall:', recall)
+    print('F1-score:', f1_score)
 
 
 if __name__ == '__main__':

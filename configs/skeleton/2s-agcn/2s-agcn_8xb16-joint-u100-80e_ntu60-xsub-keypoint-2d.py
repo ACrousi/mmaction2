@@ -6,14 +6,15 @@ model = dict(
         type='AAGCN',
         graph_cfg=dict(layout='coco', mode='spatial'),
         gcn_attention=False),  # degenerate AAGCN to AGCN
-    cls_head=dict(type='GCNHead', num_classes=60, in_channels=256))
+    cls_head=dict(type='GCNHead', num_classes=2, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = 'data/skeleton/ntu60_2d.pkl'
+# ann_file = 'data/skeleton/ntu60_2d.pkl'
+ann_file = 'train.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSampleFrames', clip_len=100),
+    dict(type='UniformSampleFrames', clip_len=150),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
     dict(type='PackActionInputs')
@@ -22,7 +23,7 @@ val_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
     dict(
-        type='UniformSampleFrames', clip_len=100, num_clips=1, test_mode=True),
+        type='UniformSampleFrames', clip_len=150, num_clips=1, test_mode=True),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
     dict(type='PackActionInputs')
@@ -31,7 +32,7 @@ test_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
     dict(
-        type='UniformSampleFrames', clip_len=100, num_clips=10,
+        type='UniformSampleFrames', clip_len=150, num_clips=10,
         test_mode=True),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
@@ -50,28 +51,28 @@ train_dataloader = dict(
             type=dataset_type,
             ann_file=ann_file,
             pipeline=train_pipeline,
-            split='xsub_train')))
+            split='train')))
 val_dataloader = dict(
     batch_size=16,
-    num_workers=2,
+    num_workers=1,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
         ann_file=ann_file,
         pipeline=val_pipeline,
-        split='xsub_val',
+        split='val',
         test_mode=True))
 test_dataloader = dict(
     batch_size=1,
-    num_workers=2,
+    num_workers=1,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
         ann_file=ann_file,
         pipeline=test_pipeline,
-        split='xsub_val',
+        split='val',
         test_mode=True))
 
 val_evaluator = [dict(type='AccMetric')]

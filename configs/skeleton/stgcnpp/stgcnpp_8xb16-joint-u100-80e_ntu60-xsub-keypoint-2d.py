@@ -8,14 +8,15 @@ model = dict(
         gcn_with_res=True,
         tcn_type='mstcn',
         graph_cfg=dict(layout='coco', mode='spatial')),
-    cls_head=dict(type='GCNHead', num_classes=60, in_channels=256))
+    cls_head=dict(type='GCNHead', num_classes=5, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = 'data/skeleton/ntu60_2d.pkl'
+ann_file = 'train.pkl'
+# ann_file = 'data/skeleton/ntu60_2d.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
-    dict(type='UniformSampleFrames', clip_len=100),
+    dict(type='UniformSampleFrames', clip_len=150),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
     dict(type='PackActionInputs')
@@ -24,7 +25,7 @@ val_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
     dict(
-        type='UniformSampleFrames', clip_len=100, num_clips=1, test_mode=True),
+        type='UniformSampleFrames', clip_len=150, num_clips=1, test_mode=True),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
     dict(type='PackActionInputs')
@@ -33,7 +34,7 @@ test_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),
     dict(
-        type='UniformSampleFrames', clip_len=100, num_clips=10,
+        type='UniformSampleFrames', clip_len=150, num_clips=10,
         test_mode=True),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=2),
@@ -95,7 +96,7 @@ param_scheduler = [
 
 optim_wrapper = dict(
     optimizer=dict(
-        type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0005, nesterov=True))
+        type='SGD', lr=0.005, momentum=0.9, weight_decay=0.005, nesterov=True))
 
 default_hooks = dict(checkpoint=dict(interval=1), logger=dict(interval=100))
 
